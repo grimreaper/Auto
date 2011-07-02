@@ -100,7 +100,7 @@ sub on_whoreply {
         # Check if this is the target channel.
         if ($STATE eq $svr.'::'.$target) {
             # If their status is not away, push to ping array.
-            if ($status !~ m/G/xsm and !exists $AWAY{lc $nick}) {
+            if ($status !~ m/(G|\+)/xsm and !exists $AWAY{lc $nick}) {
                 push @PING, $nick;
             }
         }
