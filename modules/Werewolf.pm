@@ -1434,8 +1434,14 @@ sub _player_del {
     my ($gsvr, $gchan) = split '/', $GAMECHAN;
 
     # Devoice them (and quiet if werewolf:quietdead is set).
-    cmode($gsvr, $gchan, "-v $NICKS{$player}");
-    if (conf_get('werewolf:quietdead') and $GAME) { cmode($gsvr, $gchan, "+q $NICKS{$player}!*@*"); push @GRAVEYARD, $NICKS{$player} }
+    if (conf_get('werewolf:quietdead') and $GAME) 
+    {
+        cmode($gsvr, $gchan, "-v+q $NICKS{$player} $NICKS{$player}!*@*");
+        push @GRAVEYARD, $NICKS{$player}
+    }
+    else {
+        cmode($gsvr, $gchan, "-v $NICKS{$player}");
+    }
 
     # Delete variables.
     delete $PLAYERS{$player};
