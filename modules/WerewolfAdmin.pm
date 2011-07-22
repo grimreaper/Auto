@@ -121,9 +121,6 @@ sub cmd_wolfa {
         when ('START') {
             # WOLFA START
             
-            ###### HACK for broken fstart
-            notice($src->{svr}, $src->{nick}, 'Force Start is broken - sorry!');
-            return;
 
             # Check if a game is running.
             if (!$M::Werewolf::PGAME) {
@@ -148,6 +145,10 @@ sub cmd_wolfa {
                 privmsg($src->{svr}, $src->{chan}, "$src->{nick}: Four or more players are required to play.");
                 return;
             }
+            
+            ###### HACK for broken fstart
+            notice($src->{svr}, $src->{nick}, 'Force Start is broken - sorry!');
+            return;
 
             # First, determine how many players to declare a wolf.
             my $cwolves = POSIX::ceil(keys(%M::Werewolf::PLAYERS) * .14);
