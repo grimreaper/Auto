@@ -21,6 +21,12 @@ sub _init {
     # Hook onto numeric 315.
     rchook_add('315', 'ping.eow', \&M::Ping::ping) or return;
 
+    # We don't support PostgreSQL (Not exactly sure why, though)
+    if ($Auto::ENFEAT =~ /pgsql/) { err(2, 'Unable to load Ping: PostgreSQL is not supported.', 0); return }
+
+    # Create table if it doesn't already exist
+    $Auto::DB->do('CREATE TABLE IF NOT EXISTS away (nick TEXT)') or return;
+
     # Success.
     return 1;
 }
@@ -76,14 +82,18 @@ sub cmd_away {
     my ($src, @argv) = @_;
 
     # Toggle their away status.
-    if (exists $AWAY{lc $src->{nick}}) {
-        if ($AWAY{lc $src->{nick}} eq 'G') { delete $AWAY{lc $src->{nick}} }
+    my $cdbq = $Auto::DB->prepare('SELECT * FROM away WHERE nick = ?');
+    $cdbq->execute(lc $src->{nick});
+    if ($cdbq->fetchrow_array) {
+        my $dbq = $Auto::DB->prepare('DELETE FROM away WHERE nick = ?');
+	$dbq->execute(lc $src->{nick}) or notice($src->{svr}, $src->{nick}, 'An error occurred.  You are still away.') and return;
+	privmsg($src->{svr}, $src->{nick}, 'You are now back.');
     }
     else {
-        $AWAY{lc $src->{nick}} = 'G';
+        my $dbq = $Auto::DB->prepare('INSERT INTO away (nick) VALUES (?)');
+	$dbq->execute(lc $src->{nick}) or notice($src->{svr}, $src->{nick}, 'An error occurred.  You are still back.') and return;
+	privmsg($src->{svr}, $src->{nick}, 'You are now away.');
     }
-
-    privmsg($src->{svr}, $src->{nick}, 'You are now '.((exists $AWAY{lc $src->{nick}}) ? 'away' : 'back').q{.});
 
     return 1;
 }
@@ -99,8 +109,10 @@ sub on_whoreply {
     if ($STATE) {
         # Check if this is the target channel.
         if ($STATE eq $svr.'::'.$target) {
+            my $cdbq = $Auto::DB->prepare('SELECT * FROM away WHERE nick = ?');
+	    $cdbq->execute(lc $nick);
             # If their status is not away, push to ping array.
-            if ($status !~ m/(G|\+)/xsm and !exists $AWAY{lc $nick}) {
+            if ($status !~ m/(G|\+)/xsm and !$cdbq->fetchrow_array) {
                 push @PING, $nick;
             }
         }
