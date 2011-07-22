@@ -120,6 +120,10 @@ sub cmd_wolfa {
         }
         when ('START') {
             # WOLFA START
+            
+            ###### HACK for broken fstart
+            notice($src->{svr}, $src->{nick}, 'Force Start is broken - sorry!');
+            return;
 
             # Check if a game is running.
             if (!$M::Werewolf::PGAME) {
