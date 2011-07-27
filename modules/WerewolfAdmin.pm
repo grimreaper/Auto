@@ -121,7 +121,6 @@ sub cmd_wolfa {
         when ('START') {
             # WOLFA START
             
-
             # Check if a game is running.
             if (!$M::Werewolf::PGAME) {
                 if (!$M::Werewolf::GAME) {
@@ -152,14 +151,15 @@ sub cmd_wolfa {
 
             # First, determine how many players to declare a wolf.
             my $cwolves = POSIX::ceil(keys(%M::Werewolf::PLAYERS) * .14);
-            # Only one seer, harlot, guardian angel, traitor and detective.
+            # Only one seer, harlot, guardian angel, traitor, detective, drunk, and cursed villager.
             my $cseers = 1;
-            my $charlots = my $cdrunks = my $cangels = my $ctraitors = my $cdetectives = 0;
-            if (keys %M::Werewolf::PLAYERS >= 6) { $charlots++ unless conf_get('werewolf:rated-g') }
-            if (keys %M::Werewolf::PLAYERS >= 7) { $cdrunks++ unless conf_get('werewolf:rated-g') }
-            if (keys %M::Werewolf::PLAYERS >= 9) { $cangels++ unless conf_get('werewolf:no-angels') }
-            if (keys %M::Werewolf::PLAYERS >= 12 and conf_get('werewolf:traitors')) { $ctraitors++ }
-            if (keys %M::Werewolf::PLAYERS >= 16 and conf_get('werewolf:detectives')) { $cdetectives++ }
+            my $charlots = my $cdrunks = my $cangels = my $ctraitors = my $cdetectives = my $ccursed = 0;
+            if (keys %M::Werewolf::PLAYERS >= 6) { $cdrunks++ unless conf_get('werewolf:rated-g') }
+            if (keys %M::Werewolf::PLAYERS >= 6 and conf_get('werewolf:curses')) { $ccursed++ }
+            if (keys %M::Werewolf::PLAYERS >= 8) { $charlots++ unless conf_get('werewolf:rated-g') }
+            if (keys %M::Werewolf::PLAYERS >= 10 and conf_get('werewolf:traitors')) { $ctraitors++ }
+            if (keys %M::Werewolf::PLAYERS >= 11) { $cangels++ unless conf_get('werewolf:no-angels') }
+            if (keys %M::Werewolf::PLAYERS >= 15 and conf_get('werewolf:detectives')) { $cdetectives++ }
 
             # Give all players a role.
             foreach my $plyr (keys %M::Werewolf::PLAYERS) { $M::Werewolf::PLAYERS{$plyr} = 'v' }
@@ -169,35 +169,44 @@ sub cmd_wolfa {
             # Set wolves.
             while ($cwolves > 0) {
                 my $rpi = $plyrs[int rand scalar @plyrs];
-                if ($M::Werewolf::PLAYERS{$rpi} !~ m/^(w|s|g|h|d|t)$/xsm) {
+                if ($M::Werewolf::PLAYERS{$rpi} !~ m/^(w|s|g|h|d|t|i|c)$/xsm) {
                     $M::Werewolf::PLAYERS{$rpi} = 'w';
                     $cwolves--;
-                    $M::Werewolf::STATIC[0] .= ", \2$M::Werewolf::NICKS{$rpi}\2";
+                    $M::Werewolf::STATIC{w} .= ", \2$M::Werewolf::NICKS{$rpi}\2";
                 }
             }
-            $M::Werewolf::STATIC[0] = substr $M::Werewolf::STATIC[0], 2;
+            $M::Werewolf::STATIC{w} = substr $M::Werewolf::STATIC{w}, 2;
             # Set seers.
             while ($cseers > 0) {
                 my $rpi = $plyrs[int rand scalar @plyrs];
-                if ($M::Werewolf::PLAYERS{$rpi} !~ m/^(w|g|h|d|t)$/xsm) {
+                if ($M::Werewolf::PLAYERS{$rpi} !~ m/^(w|h|g|d|t|i|c)$/xsm) {
                     $M::Werewolf::PLAYERS{$rpi} = 's';
                     $cseers--;
-                    $M::Werewolf::STATIC[1] = "\2$M::Werewolf::NICKS{$rpi}\2";
+                    $M::Werewolf::STATIC{s} = "\2$M::Werewolf::NICKS{$rpi}\2";
                 }
             }
             # Set harlots.
             while ($charlots > 0) {
                 my $rpi = $plyrs[int rand scalar @plyrs];
-                if ($M::Werewolf::PLAYERS{$rpi} !~ m/^(w|g|s|d|t)$/xsm) {
+                if ($M::Werewolf::PLAYERS{$rpi} !~ m/^(w|s|g|d|t|i|c)$/xsm) {
                     $M::Werewolf::PLAYERS{$rpi} = 'h';
                     $charlots--;
-                    $M::Werewolf::STATIC[2] = "\2$M::Werewolf::NICKS{$rpi}\2";
+                    $M::Werewolf::STATIC{h} = "\2$M::Werewolf::NICKS{$rpi}\2";
+                }
+            }
+            # Set cursed villagers.
+            while ($ccursed > 0) {
+                my $rpi = $plyrs[int rand scalar @plyrs];
+                if ($M::Werewolf::PLAYERS{$rpi} !~ m/^(w|s|t)$/xsm) {
+                    $M::Werewolf::PLAYERS{$rpi} .= 'c';
+                    $ccursed--;
+                    $M::Werewolf::STATIC{c} = "\2$M::Werewolf::NICKS{$rpi}\2";
                 }
             }
             # Set drunks.
             while ($cdrunks > 0) {
                 my $rpi = $plyrs[int rand scalar @plyrs];
-                if ($M::Werewolf::PLAYERS{$rpi} =~ m/v/xsm) {
+                if ($M::Werewolf::PLAYERS{$rpi} =~ m/v/xsm and $M::Werewolf::PLAYERS{$rpi} !~ m/c/xsm) {
                     $M::Werewolf::PLAYERS{$rpi} = 'vi';
                     $cdrunks--;
                 }
@@ -205,35 +214,35 @@ sub cmd_wolfa {
             # Set guardian angels.
             while ($cangels > 0) {
                 my $rpi = $plyrs[int rand scalar @plyrs];
-                if ($M::Werewolf::PLAYERS{$rpi} !~ m/^(w|h|s|d|t)$/xsm) {
+                if ($M::Werewolf::PLAYERS{$rpi} !~ m/^(w|h|s|d|t|i|c)$/xsm) {
                     $M::Werewolf::PLAYERS{$rpi} = 'g';
                     $cangels--;
-                    $M::Werewolf::STATIC[3] = "\2$M::Werewolf::NICKS{$rpi}\2";
+                    $M::Werewolf::STATIC{g} = "\2$M::Werewolf::NICKS{$rpi}\2";
                 }
             }
             # Set traitors.
             while ($ctraitors > 0) {
                 my $rpi = $plyrs[int rand scalar @plyrs];
-                if ($M::Werewolf::PLAYERS{$rpi} !~ m/^(w|h|s|d|g)$/xsm) {
+                if ($M::Werewolf::PLAYERS{$rpi} !~ m/^(w|g|s|d|h|i|c)$/xsm) {
                     $M::Werewolf::PLAYERS{$rpi} = 't';
                     $ctraitors--;
-                    $M::Werewolf::STATIC[4] = "\2$M::Werewolf::NICKS{$rpi}\2";
+                    $M::Werewolf::STATIC{t} = "\2$M::Werewolf::NICKS{$rpi}\2";
                 }
             }
             # Set detectives.
             while ($cdetectives > 0) {
                 my $rpi = $plyrs[int rand scalar @plyrs];
-                if ($M::Werewolf::PLAYERS{$rpi} !~ m/^(w|h|s|g|t)$/xsm) {
+                if ($M::Werewolf::PLAYERS{$rpi} !~ m/^(w|g|s|h|t|i|c)$/xsm) {
                     $M::Werewolf::PLAYERS{$rpi} = 'd';
                     $cdetectives--;
-                    $M::Werewolf::STATIC[5] = "\2$M::Werewolf::NICKS{$rpi}\2";
+                    $M::Werewolf::STATIC{d} = "\2$M::Werewolf::NICKS{$rpi}\2";
                 }
             }
 
-            # If there's 8 or more players, give one of them a gun.
-            if (keys %M::Werewolf::PLAYERS >= 8) {
+            # If there's 10 or more players, give one of them a gun.
+            if (keys %M::Werewolf::PLAYERS >= 10) {
                 my $rpi = $plyrs[int rand scalar @plyrs];
-                while ($M::Werewolf::PLAYERS{$rpi} =~ m/w/xsm || $M::Werewolf::PLAYERS{$rpi} =~ m/t/xsm) { $rpi = $plyrs[int rand scalar @plyrs] }
+                while ($M::Werewolf::PLAYERS{$rpi} =~ m/(w|t|c)/xsm) { $rpi = $plyrs[int rand scalar @plyrs] }
                 $M::Werewolf::PLAYERS{$rpi} .= 'b';
 
                 # And give them PLAYER COUNT * .12 bullets rounded up.
@@ -253,8 +262,8 @@ sub cmd_wolfa {
             foreach (keys %M::Werewolf::PLAYERS) { $M::Werewolf::SPOKE{$_} = time }
 
             # All players have their role, so lets begin the game!
-            my ($gsvr, $gchan) = split '/', $M::Werewolf::GAMECHAN, 2;
-            privmsg($gsvr, $gchan, "Game is now starting. (forced start by \2$src->{nick}\2)");
+            my ($gsvr, $gchan) = split '/', $M::Werewolf::GAMECHAN;
+            privmsg($gsvr, $gchan, join(', ', values(%M::Werewolf::NICKS)).': Welcome to Werewolf, the popular detective/social party game (a theme of Mafia).');
             cmode($gsvr, $gchan, '+m');
             # Delete waiting timer.
             timer_del('werewolf.joinwait');
