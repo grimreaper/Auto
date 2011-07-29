@@ -117,6 +117,7 @@ sub cmd_wolf {
     # For garbage data.
     if ($src->{chan}) { $src->{chan} = lc $src->{chan} }
 
+    print $src->{nick}.': '.$argv[0].' '.$argv[1]."\n";
     # Check if this was a private or public message.
     if (exists $src->{chan}) {
         # Iterate the parameter.
@@ -273,6 +274,20 @@ sub cmd_wolf {
                 if (keys %PLAYERS >= 10 and conf_get('werewolf:traitors')) { $ctraitors++ }
                 if (keys %PLAYERS >= 11) { $cangels++ unless conf_get('werewolf:no-angels') }
                 if (keys %PLAYERS >= 15 and conf_get('werewolf:detectives')) { $cdetectives++ }
+                print "Players: ".int keys(%PLAYERS)."\n";
+                print "Wolves: ".$cwolves."\n";
+                print "Drunks: 1\n" if $cdrunks == 1;
+                print "No drunks\n" if conf_get('werewolf:rated-g');
+                print "Cursed: 1\n" if $ccursed == 1;
+                print "No cursed\n" unless conf_get('werewolf:curses');
+                print "Harlots: 1\n" if $charlots == 1;
+                print "No harlotss\n" if conf_get('werewolf:rated-g');
+                print "Traitors: 1\n" if $ctraitors == 1;
+                print "No traitors\n" unless conf_get('werewolf:traitors');
+                print "Angels: 1\n" if $cangels == 1;
+                print "No angels\n" if conf_get('werewolf:no-angels');
+                print "Detectives: 1\n" if $cdetectives == 1;
+                print "No detectives\n" unless conf_get('werewolf:detectives');
 
                 # Give all players a role.
                 foreach my $plyr (keys %PLAYERS) { $PLAYERS{$plyr} = 'v' }
@@ -371,8 +386,13 @@ sub cmd_wolf {
                 @TIMES = (0, 0);
                 $LASTTIME = 0;
 
+                print "Roles: \n";
+
                 # Set spoke variables.
-                foreach (keys %PLAYERS) { $SPOKE{$_} = time }
+                foreach (keys %PLAYERS) {
+                    $SPOKE{$_} = time;
+                    print $_.': '.$PLAYERS{$_}."\n"; 
+                }
 
                 # All players have their role, so lets begin the game!
                 my ($gsvr, $gchan) = split '/', $GAMECHAN;
