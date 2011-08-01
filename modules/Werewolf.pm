@@ -7,7 +7,6 @@ use warnings;
 use feature qw(switch);
 use API::Std qw(cmd_add cmd_del trans hook_add hook_del timer_add timer_del trans conf_get has_priv match_user);
 use API::IRC qw(privmsg notice cmode);
-use API::Log qw(slog);
 our ($GAME, $PGAME, $GAMECHAN, $GAMETIME, %PLAYERS, %NICKS, %STATIC, $PHASE, $SEEN, $VISIT, $GUARD, %KILL, %WKILL, %LYNCH, %SPOKE, %WARN, $LVOTEN, @SHOT, 
      $BULLETS, $DETECTED, $WAIT, $WAITED, $FM, $LASTTIME, @TIMES, $GOAT, %COMMANDS, @GRAVEYARD);
 my $FCHAR = (conf_get('fantasy_pf'))[0][0];
@@ -118,7 +117,6 @@ sub cmd_wolf {
     # For garbage data.
     if ($src->{chan}) { $src->{chan} = lc $src->{chan} }
 
-    slog($src->{nick}.': '.$argv[0].' '.$argv[1]);
     # Check if this was a private or public message.
     if (exists $src->{chan}) {
         # Iterate the parameter.
@@ -275,21 +273,6 @@ sub cmd_wolf {
                 if (keys %PLAYERS >= 10 and conf_get('werewolf:traitors')) { $ctraitors++ }
                 if (keys %PLAYERS >= 11) { $cangels++ unless @{conf_get('werewolf:no-angels')}[0] }
                 if (keys %PLAYERS >= 15 and conf_get('werewolf:detectives')) { $cdetectives++ }
-                slog("Players: ".int keys(%PLAYERS));
-                slog("Wolves: ".$cwolves);
-                slog("Drunks: 1") if $cdrunks == 1;
-                slog("No drunks") if conf_get('werewolf:rated-g');
-                slog("Cursed: 1") if $ccursed == 1;
-                slog("No cursed") unless conf_get('werewolf:curses');
-                slog("Harlots: 1") if $charlots == 1;
-                slog("No harlots") if conf_get('werewolf:rated-g');
-                slog("Traitors: 1") if $ctraitors == 1;
-                slog("No traitors") unless conf_get('werewolf:traitors');
-                slog("Angels: 1") if $cangels == 1;
-                slog("No angels") if @{conf_get('werewolf:no-angels')}[0];
-                slog("Detectives: 1") if $cdetectives == 1;
-                slog("No detectives") unless conf_get('werewolf:detectives');
-                slog("werewolf:no-angels: " . join(', ', @{conf_get('werewolf:no-angels')}));
 
                 # Give all players a role.
                 foreach my $plyr (keys %PLAYERS) { $PLAYERS{$plyr} = 'v' }
@@ -388,12 +371,10 @@ sub cmd_wolf {
                 @TIMES = (0, 0);
                 $LASTTIME = 0;
 
-                slog("Roles: ");
 
                 # Set spoke variables.
                 foreach (keys %PLAYERS) {
                     $SPOKE{$_} = time;
-                    slog($_.': '.$PLAYERS{$_}); 
                 }
 
                 # All players have their role, so lets begin the game!
