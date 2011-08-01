@@ -289,7 +289,7 @@ sub cmd_wolf {
                 slog("No angels") if conf_get('werewolf:no-angels');
                 slog("Detectives: 1") if $cdetectives == 1;
                 slog("No detectives") unless conf_get('werewolf:detectives');
-                slog("werewolf:no-angels: " . conf_get('werewolf:no-angels')));
+                slog("werewolf:no-angels: " . conf_get('werewolf:no-angels'));
 
                 # Give all players a role.
                 foreach my $plyr (keys %PLAYERS) { $PLAYERS{$plyr} = 'v' }
