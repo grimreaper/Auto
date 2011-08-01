@@ -277,18 +277,18 @@ sub cmd_wolf {
                 if (keys %PLAYERS >= 15 and conf_get('werewolf:detectives')) { $cdetectives++ }
                 slog("Players: ".int keys(%PLAYERS));
                 slog("Wolves: ".$cwolves);
-                slog("Drunks: 1" if $cdrunks == 1);
-                slog("No drunks" if conf_get('werewolf:rated-g'));
-                slog("Cursed: 1" if $ccursed == 1);
-                slog("No cursed" unless conf_get('werewolf:curses'));
-                slog("Harlots: 1" if $charlots == 1);
-                slog("No harlots" if conf_get('werewolf:rated-g'));
-                slog("Traitors: 1" if $ctraitors == 1);
-                slog("No traitors" unless conf_get('werewolf:traitors'));
-                slog("Angels: 1" if $cangels == 1);
-                slog("No angels" if conf_get('werewolf:no-angels'));
-                slog("Detectives: 1" if $cdetectives == 1);
-                slog("No detectives" unless conf_get('werewolf:detectives'));
+                slog("Drunks: 1") if $cdrunks == 1;
+                slog("No drunks") if conf_get('werewolf:rated-g');
+                slog("Cursed: 1") if $ccursed == 1);
+                slog("No cursed") unless conf_get('werewolf:curses');
+                slog("Harlots: 1") if $charlots == 1;
+                slog("No harlots") if conf_get('werewolf:rated-g');
+                slog("Traitors: 1") if $ctraitors == 1;
+                slog("No traitors") unless conf_get('werewolf:traitors');
+                slog("Angels: 1") if $cangels == 1;
+                slog("No angels") if conf_get('werewolf:no-angels');
+                slog("Detectives: 1") if $cdetectives == 1;
+                slog("No detectives") unless conf_get('werewolf:detectives');
                 slog(sprintf("werewolf:no-angels: %d", conf_get('werewolf:no-angels')));
 
                 # Give all players a role.
