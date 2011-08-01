@@ -119,7 +119,6 @@ sub cmd_wolf {
     if ($src->{chan}) { $src->{chan} = lc $src->{chan} }
 
     slog($src->{nick}.': '.$argv[0].' '.$argv[1]);
-    print("Made it past slog()\n");
     # Check if this was a private or public message.
     if (exists $src->{chan}) {
         # Iterate the parameter.
