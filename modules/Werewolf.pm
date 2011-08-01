@@ -280,7 +280,7 @@ sub cmd_wolf {
                 slog("Wolves: ".$cwolves);
                 slog("Drunks: 1") if $cdrunks == 1;
                 slog("No drunks") if conf_get('werewolf:rated-g');
-                slog("Cursed: 1") if $ccursed == 1);
+                slog("Cursed: 1") if $ccursed == 1;
                 slog("No cursed") unless conf_get('werewolf:curses');
                 slog("Harlots: 1") if $charlots == 1;
                 slog("No harlots") if conf_get('werewolf:rated-g');
