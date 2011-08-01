@@ -271,7 +271,7 @@ sub cmd_wolf {
                 if (keys %PLAYERS >= 6 and conf_get('werewolf:curses')) { $ccursed++ }
                 if (keys %PLAYERS >= 8) { $charlots++ unless conf_get('werewolf:rated-g') }
                 if (keys %PLAYERS >= 10 and conf_get('werewolf:traitors')) { $ctraitors++ }
-                if (keys %PLAYERS >= 11) { $cangels++ unless conf_get('werewolf:no-angels') }
+                if (keys %PLAYERS >= 11) { $cangels++ unless @{conf_get('werewolf:no-angels')}[0] }
                 if (keys %PLAYERS >= 15 and conf_get('werewolf:detectives')) { $cdetectives++ }
 
                 # Give all players a role.
@@ -371,8 +371,11 @@ sub cmd_wolf {
                 @TIMES = (0, 0);
                 $LASTTIME = 0;
 
+
                 # Set spoke variables.
-                foreach (keys %PLAYERS) { $SPOKE{$_} = time }
+                foreach (keys %PLAYERS) {
+                    $SPOKE{$_} = time;
+                }
 
                 # All players have their role, so lets begin the game!
                 my ($gsvr, $gchan) = split '/', $GAMECHAN;
@@ -692,7 +695,7 @@ sub cmd_wolf {
 
                     # Push extra roles.
                     if (!conf_get('werewolf:rated-g')) { push @data, "\2$charlots\2 harlots" }
-                    if (!conf_get('werewolf:no-angels')) { push @data, "\2$cangels\2 guardian angels" }
+                    if (!@{conf_get('werewolf:no-angels')}[0]) { push @data, "\2$cangels\2 guardian angels" }
                     if (conf_get('werewolf:traitors')) { push @data, "\2$ctraitors\2 traitors" }
                     if (conf_get('werewolf:detectives')) { push @data, "\2$cdetectives\2 detectives" }
                     

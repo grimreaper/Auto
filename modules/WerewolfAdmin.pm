@@ -158,7 +158,7 @@ sub cmd_wolfa {
             if (keys %M::Werewolf::PLAYERS >= 6 and conf_get('werewolf:curses')) { $ccursed++ }
             if (keys %M::Werewolf::PLAYERS >= 8) { $charlots++ unless conf_get('werewolf:rated-g') }
             if (keys %M::Werewolf::PLAYERS >= 10 and conf_get('werewolf:traitors')) { $ctraitors++ }
-            if (keys %M::Werewolf::PLAYERS >= 11) { $cangels++ unless conf_get('werewolf:no-angels') }
+            if (keys %M::Werewolf::PLAYERS >= 11) { $cangels++ unless @{conf_get('werewolf:no-angels')}[0] }
             if (keys %M::Werewolf::PLAYERS >= 15 and conf_get('werewolf:detectives')) { $cdetectives++ }
 
             # Give all players a role.
